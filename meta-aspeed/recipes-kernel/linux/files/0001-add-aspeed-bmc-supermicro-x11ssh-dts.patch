@@ -1,0 +1,118 @@
+diff --git a/arch/arm/boot/dts/aspeed/Makefile b/arch/arm/boot/dts/aspeed/Makefile
+--- a/arch/arm/boot/dts/aspeed/Makefile
++++ b/arch/arm/boot/dts/aspeed/Makefile
+@@ -54,6 +54,7 @@ dtb-$(CONFIG_ARCH_ASPEED) += \
+ 	aspeed-bmc-quanta-q71l.dtb \
+ 	aspeed-bmc-quanta-s6q.dtb \
+ 	aspeed-bmc-supermicro-x11spi.dtb \
++	aspeed-bmc-supermicro-x11ssh.dtb \
+ 	aspeed-bmc-inventec-starscream.dtb \
+ 	aspeed-bmc-inventec-transformers.dtb \
+ 	aspeed-bmc-tyan-s7106.dtb \
+diff --git a/arch/arm/boot/dts/aspeed/aspeed-bmc-supermicro-x11ssh.dts b/arch/arm/boot/dts/aspeed/aspeed-bmc-supermicro-x11ssh.dts
+new file mode 100644
+--- /dev/null
++++ b/arch/arm/boot/dts/aspeed/aspeed-bmc-supermicro-x11ssh.dts
+@@ -0,0 +1,102 @@
++// SPDX-License-Identifier: GPL-2.0+
++/dts-v1/;
++
++#include "aspeed-g4.dtsi"
++#include <dt-bindings/gpio/aspeed-gpio.h>
++
++/ {
++	model = "Supermicro X11 BMC";
++	compatible = "aspeed,ast2400";
++
++	aliases {
++		con = &uart5;
++	};
++	chosen {
++		stdout-path = "con:115200n8";
++	};
++
++	memory@40000000 {
++        /* 128 MiB DDR3 memory */
++		reg = <0x40000000 0x08000000>;
++	};
++
++	reserved-memory {
++		#address-cells = <1>;
++		#size-cells = <1>;
++		ranges;
++
++ 		vga_memory: framebuffer@47000000 {
++			no-map;
++			reg = <0x47000000 0x01000000>; /* 16MB */
++		};
++
++ 		flash_memory: region@98000000 {
++			no-map;
++			reg = <0x98000000 0x01000000>; /* 16MB */
++		};
++	};
++};
++
++&fmc {
++	status = "okay";
++	flash@0 {
++		status = "okay";
++		//m25p,fast-read;
++		m25p;
++		label = "bmc";
++
++#include "openbmc-flash-layout.dtsi"
++	};
++};
++
++&spi {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_spi1debug_default>;
++	flash@0 {
++		status = "okay";
++		m25p,fast-read;
++		label = "bios";
++	};
++};
++
++// /dev/ttyS4: BMC console UART
++&uart5 {
++	status = "okay";
++};
++
++&mac0 {
++	status = "okay";
++
++ 	use-ncsi;
++	no-hw-checksum;
++
++ 	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_rmii1_default>;
++};
++
++
++// /dev/ttyS2: Host's ttyS1
++&uart3 {
++	status = "okay";
++};
++
++&vuart {
++    status = "okay";
++};
++
++&lpc_ctrl {
++    status = "okay";
++};
++
++&lpc_snoop {
++    status = "okay";
++    snoop-ports = <0x80>;
++};
++
++&pinctrl {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_flbusy_default &pinctrl_flwp_default
++ 			     &pinctrl_vgahs_default &pinctrl_vgavs_default
++			     &pinctrl_ddcclk_default &pinctrl_ddcdat_default>;
++};
