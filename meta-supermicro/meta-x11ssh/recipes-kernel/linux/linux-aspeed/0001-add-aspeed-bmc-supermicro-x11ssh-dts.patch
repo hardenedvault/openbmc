@@ -13,7 +13,7 @@ diff --git a/arch/arm/boot/dts/aspeed/aspeed-bmc-supermicro-x11ssh.dts b/arch/ar
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm/boot/dts/aspeed/aspeed-bmc-supermicro-x11ssh.dts
-@@ -0,0 +1,102 @@
+@@ -0,0 +1,164 @@
 +// SPDX-License-Identifier: GPL-2.0+
 +/dts-v1/;
 +
@@ -76,6 +76,10 @@ new file mode 100644
 +	};
 +};
 +
++&uart1 {
++	status = "okay";
++};
++
 +// /dev/ttyS4: BMC console UART
 +&uart5 {
 +	status = "okay";
@@ -91,9 +95,25 @@ new file mode 100644
 +	pinctrl-0 = <&pinctrl_rmii1_default>;
 +};
 +
++&mac1 {
++	status = "okay";
++
++	no-hw-checksum;
++
++ 	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_rgmii2_default>;
++};
++
++&uart2 {
++	status = "okay";
++};
 +
 +// /dev/ttyS2: Host's ttyS1
 +&uart3 {
++	status = "okay";
++};
++
++&uart4 {
 +	status = "okay";
 +};
 +
@@ -115,4 +135,46 @@ new file mode 100644
 +	pinctrl-0 = <&pinctrl_flbusy_default &pinctrl_flwp_default
 + 			     &pinctrl_vgahs_default &pinctrl_vgavs_default
 +			     &pinctrl_ddcclk_default &pinctrl_ddcdat_default>;
++};
++
++&adc {
++	status = "okay";
++};
++
++&vhub {
++	status = "okay";
++};
++
++&gpio {
++	status = "okay";
++	gpio-line-names =
++	/*A0-A7*/	"","","","","","","","",
++	/*B0-B7*/	"","","","","","","","",
++	/*C0-C7*/	"","POWER_BTN_N","","","","","","",
++	/*D0-D7*/	"","","","","","","POWER_LED_N","UID_LED_N",
++	/*E0-E7*/	"","","RESET_BTN_N","","BIOS_MUX_N","","","",
++	/*F0-F7*/	"","","","","","","","",
++	/*G0-G7*/	"","","","","","","","",
++	/*H0-H7*/	"","","","","","","","",
++	/*I0-I7*/	"","","","","","","","",
++	/*J0-J7*/	"","","","","","","","",
++	/*K0-K7*/	"","","","","","","","",
++	/*L0-L7*/	"","","","","","","","",
++	/*M0-M7*/	"","","","","","","","",
++	/*N0-N7*/	"","","","","","","","",
++	/*O0-O7*/	"","","","","","","","",
++	/*P0-P7*/	"","","","","","","","",
++	/*Q0-Q7*/	"","","","","","","","",
++	/*R0-R7*/	"","","","","","","","",
++	/*S0-S7*/	"","","","","","","","",
++	/*T0-T7*/	"","","","","","","","",
++	/*U0-U7*/	"","","","","","","","",
++	/*V0-V7*/	"","","","","","","","",
++	/*W0-W7*/	"","","","","","","","",
++	/*X0-X7*/	"","","","","","","","",
++	/*Y0-Y7*/	"","","","","","","","",
++	/*Z0-Z7*/	"","","","","","","","",
++	/*AA0-AA7*/	"","","","","","","","",
++	/*AB0-AB7*/	"","","","","","","","",
++	/*AC0-AC7*/	"","","","","","","","";
 +};

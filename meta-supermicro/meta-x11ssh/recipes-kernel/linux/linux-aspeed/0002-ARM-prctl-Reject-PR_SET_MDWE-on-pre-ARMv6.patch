@@ -1,0 +1,76 @@
+diff --git a/arch/arm/include/asm/mman.h b/arch/arm/include/asm/mman.h
+new file mode 100644
+--- /dev/null
++++ b/arch/arm/include/asm/mman.h
+@@ -0,0 +1,14 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++#ifndef __ASM_MMAN_H__
++#define __ASM_MMAN_H__
++
++#include <asm/system_info.h>
++#include <uapi/asm/mman.h>
++
++static inline bool arch_memory_deny_write_exec_supported(void)
++{
++	return cpu_architecture() >= CPU_ARCH_ARMv6;
++}
++#define arch_memory_deny_write_exec_supported arch_memory_deny_write_exec_supported
++
++#endif /* __ASM_MMAN_H__ */
+diff --git a/arch/parisc/include/asm/mman.h b/arch/parisc/include/asm/mman.h
+new file mode 100644
+--- /dev/null
++++ b/arch/parisc/include/asm/mman.h
+@@ -0,0 +1,14 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++#ifndef __ASM_MMAN_H__
++#define __ASM_MMAN_H__
++
++#include <uapi/asm/mman.h>
++
++/* PARISC cannot allow mdwe as it needs writable stacks */
++static inline bool arch_memory_deny_write_exec_supported(void)
++{
++	return false;
++}
++#define arch_memory_deny_write_exec_supported arch_memory_deny_write_exec_supported
++
++#endif /* __ASM_MMAN_H__ */
+diff --git a/include/linux/mman.h b/include/linux/mman.h
+--- a/include/linux/mman.h
++++ b/include/linux/mman.h
+@@ -162,6 +162,14 @@ calc_vm_flag_bits(unsigned long flags)
+ 
+ unsigned long vm_commit_limit(void);
+ 
++#ifndef arch_memory_deny_write_exec_supported
++static inline bool arch_memory_deny_write_exec_supported(void)
++{
++	return true;
++}
++#define arch_memory_deny_write_exec_supported arch_memory_deny_write_exec_supported
++#endif
++
+ /*
+  * Denies creating a writable executable mapping or gaining executable permissions.
+  *
+diff --git a/kernel/sys.c b/kernel/sys.c
+--- a/kernel/sys.c
++++ b/kernel/sys.c
+@@ -2408,8 +2408,11 @@ static inline int prctl_set_mdwe(unsigned long bits, unsigned long arg3,
+ 	if (bits & PR_MDWE_NO_INHERIT && !(bits & PR_MDWE_REFUSE_EXEC_GAIN))
+ 		return -EINVAL;
+ 
+-	/* PARISC cannot allow mdwe as it needs writable stacks */
+-	if (IS_ENABLED(CONFIG_PARISC))
++	/*
++	 * EOPNOTSUPP might be more appropriate here in principle, but
++	 * existing userspace depends on EINVAL specifically.
++	 */
++	if (!arch_memory_deny_write_exec_supported())
+ 		return -EINVAL;
+ 
+ 	current_bits = get_current_mdwe();
+-- 
+2.43.0
+
